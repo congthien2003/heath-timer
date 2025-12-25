@@ -17,7 +17,7 @@
 	"build": {
 		"appId": "com.healthtimer.app",
 		"productName": "HealthTimer",
-		"asar": false,
+		"asar": true,
 		"directories": {
 			"output": "dist",
 			"buildResources": "resources"
