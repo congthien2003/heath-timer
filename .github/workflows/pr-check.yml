@@ -1,0 +1,63 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  quality-check:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+
+      - name: Build project
+        run: npm run build
+
+      - name: Check package size
+        shell: bash
+        run: |
+          echo "## Build Output Size" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          du -sh out/ >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const buildStatus = '${{ job.status }}';
+
+            const comment = `## 🔍 Quality Check Results
+
+            **Build Status:** ${buildStatus === 'success' ? '✅ Passed' : '❌ Failed'}
+
+            ### Summary
+            - TypeScript compilation: ${buildStatus === 'success' ? '✅' : '❌'}
+            - Build process: ${buildStatus === 'success' ? '✅' : '❌'}
+
+            ${buildStatus === 'success' ? '🎉 All checks passed! Ready for review.' : '⚠️ Please fix the issues above.'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
