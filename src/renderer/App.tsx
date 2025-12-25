@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTimerStore } from "./stores/timer.store";
 import { Task } from "../shared/models/task.model";
 import { SettingsModal } from "./components/SettingsModal";
