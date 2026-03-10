@@ -19,6 +19,12 @@ export const IPC_EVENTS = {
 
 	// Timer info
 	TIMER_INFO_GET: "timer:info:get",
+
+	// History & Stats events
+	HISTORY_ADD: "history:add",
+	HISTORY_GET_ALL: "history:get-all",
+	STATS_GET: "stats:get",
+	BEST_STREAK_GET: "stats:best-streak",
 } as const;
 
 export type IpcEventType = (typeof IPC_EVENTS)[keyof typeof IPC_EVENTS];

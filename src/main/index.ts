@@ -56,7 +56,7 @@ function createWindow(): void {
 		"did-fail-load",
 		(_event, errorCode, errorDescription) => {
 			console.error("Failed to load page:", errorCode, errorDescription);
-		}
+		},
 	);
 
 	mainWindow.on("close", (event) => {
@@ -267,7 +267,6 @@ ipcMain.on(IPC_EVENTS.TIMER_RESET, () => {
 
 ipcMain.on(IPC_EVENTS.TASK_DONE, (_event, taskId: string) => {
 	console.log(`Task ${taskId} marked as done`);
-	currentTask = null;
 
 	// Reset timer after completing task
 	if (timerService) {
@@ -279,6 +278,26 @@ ipcMain.on(IPC_EVENTS.TASK_DONE, (_event, taskId: string) => {
 	if (mainWindow && !mainWindow.isDestroyed()) {
 		mainWindow.webContents.send(IPC_EVENTS.TASK_COMPLETED);
 	}
+
+	// Add to history
+	if (storageService && currentTask) {
+		const taskToLog = { ...currentTask }; // Capture current state
+		storageService.addHistory({
+			id: `${Date.now()}-${taskId}`,
+			taskId: taskId,
+			taskTitle: taskToLog.title,
+			completedAt: Date.now(),
+		});
+	}
+	currentTask = null;
+});
+
+ipcMain.handle(IPC_EVENTS.HISTORY_GET_ALL, () => {
+	return storageService?.getHistory() || [];
+});
+
+ipcMain.handle(IPC_EVENTS.STATS_GET, () => {
+	return storageService?.getStats();
 });
 
 ipcMain.on(IPC_EVENTS.TASK_SNOOZE, (_event, minutes: number) => {
@@ -302,7 +321,7 @@ ipcMain.on(IPC_EVENTS.TASK_SNOOZE, (_event, minutes: number) => {
 		const originalInterval = timerService?.getOriginalThreshold() || 60;
 		notificationService.showSimple(
 			"⏰ Đã snooze",
-			`Sẽ nhắc lại sau ${minutes} phút, sau đó trở về chu kỳ ${originalInterval} phút`
+			`Sẽ nhắc lại sau ${minutes} phút, sau đó trở về chu kỳ ${originalInterval} phút`,
 		);
 	}
 });

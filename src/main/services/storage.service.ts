@@ -1,50 +1,86 @@
-import { app } from "electron";
-import { join } from "path";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import Store from "electron-store";
 import { Settings, DEFAULT_SETTINGS } from "../../shared/models/settings.model";
+import { HistoryRecord, UserStats } from "../../shared/models/history.model";
+
+interface Schema {
+	settings: Settings;
+	history: HistoryRecord[];
+	stats: UserStats;
+}
 
 export class StorageService {
-	private settingsPath: string;
+	private store: Store<Schema>;
 
 	constructor() {
-		const userDataPath = app.getPath("userData");
-		const configDir = join(userDataPath, "config");
+		this.store = new Store<Schema>({
+			defaults: {
+				settings: DEFAULT_SETTINGS,
+				history: [],
+				stats: {
+					totalCompleted: 0,
+					currentStreak: 0,
+					bestStreak: 0,
+				},
+			},
+		});
 
-		// Ensure config directory exists
-		if (!existsSync(configDir)) {
-			mkdirSync(configDir, { recursive: true });
-		}
-
-		this.settingsPath = join(configDir, "settings.json");
-		console.log("Settings path:", this.settingsPath);
+		console.log("Store path:", this.store.path);
 	}
 
 	loadSettings(): Settings {
-		try {
-			if (existsSync(this.settingsPath)) {
-				const data = readFileSync(this.settingsPath, "utf-8");
-				const settings = JSON.parse(data);
-				console.log("Loaded settings:", settings);
-				return { ...DEFAULT_SETTINGS, ...settings };
-			}
-		} catch (error) {
-			console.error("Failed to load settings:", error);
-		}
-
-		console.log("Using default settings");
-		return DEFAULT_SETTINGS;
+		return this.store.get("settings");
 	}
 
 	saveSettings(settings: Settings): void {
-		try {
-			writeFileSync(
-				this.settingsPath,
-				JSON.stringify(settings, null, 2),
-				"utf-8"
-			);
-			console.log("Settings saved:", settings);
-		} catch (error) {
-			console.error("Failed to save settings:", error);
+		this.store.set("settings", settings);
+	}
+
+	// History methods
+	addHistory(record: HistoryRecord): void {
+		const history = this.store.get("history") || [];
+		history.push(record);
+		// Keep only last 100 records to avoid bloat
+		if (history.length > 100) {
+			history.shift();
 		}
+		this.store.set("history", history);
+		this.updateStats(record);
+	}
+
+	getHistory(): HistoryRecord[] {
+		return this.store.get("history") || [];
+	}
+
+	// Stats methods
+	getStats(): UserStats {
+		return this.store.get("stats");
+	}
+
+	private updateStats(record: HistoryRecord): void {
+		const stats = this.store.get("stats");
+		const today = new Date(record.completedAt).toISOString().split("T")[0];
+
+		stats.totalCompleted += 1;
+
+		if (stats.lastCompletedDate === today) {
+			// Already completed today, do nothing to streak
+		} else {
+			const yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+			if (stats.lastCompletedDate === yesterdayStr) {
+				stats.currentStreak += 1;
+			} else {
+				stats.currentStreak = 1;
+			}
+
+			if (stats.currentStreak > stats.bestStreak) {
+				stats.bestStreak = stats.currentStreak;
+			}
+			stats.lastCompletedDate = today;
+		}
+
+		this.store.set("stats", stats);
 	}
 }

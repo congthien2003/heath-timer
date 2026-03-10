@@ -3,6 +3,7 @@ export interface Settings {
 	soundEnabled: boolean;
 	autoStart: boolean;
 	notificationEnabled: boolean;
+	theme: "light" | "dark" | "system";
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -10,4 +11,5 @@ export const DEFAULT_SETTINGS: Settings = {
 	soundEnabled: true,
 	autoStart: false,
 	notificationEnabled: true,
+	theme: "system",
 };

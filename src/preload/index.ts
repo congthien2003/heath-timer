@@ -35,7 +35,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	},
 	onSettingsUpdated: (callback: (settings: any) => void) => {
 		ipcRenderer.on(IPC_EVENTS.SETTINGS_UPDATED, (_, settings) =>
-			callback(settings)
+			callback(settings),
 		);
 	},
+	// History & Stats
+	getHistory: () => ipcRenderer.invoke(IPC_EVENTS.HISTORY_GET_ALL),
+	getStats: () => ipcRenderer.invoke(IPC_EVENTS.STATS_GET),
 });
