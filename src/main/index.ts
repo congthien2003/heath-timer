@@ -75,10 +75,8 @@ function createWindow(): void {
 		mainWindow = null;
 	});
 
-	// Initialize services
-	storageService = new StorageService();
-	currentSettings = storageService.loadSettings();
-
+	// Initialize services. Settings & storage are loaded in app.whenReady()
+	// before this function runs; timerService & notificationService are created here.
 	timerService = new TimerService(mainWindow);
 	notificationService = new NotificationService();
 
@@ -87,14 +85,16 @@ function createWindow(): void {
 
 	console.log("Services initialized with settings:", currentSettings);
 
-	// Setup timer threshold callback
-	timerService.onThresholdReached(() => {
+	// Setup timer threshold callback. Capture the just-assigned service in a
+	// local const so TS keeps it non-null inside the closure.
+	const ts = timerService;
+	ts.onThresholdReached(() => {
 		currentTask = getRandomTask();
 		console.log("Task triggered:", currentTask);
 
 		// Show notification
 		if (notificationService && currentTask) {
-			notificationService.show(currentTask);
+			notificationService.show(currentTask, ts.getThreshold());
 		}
 
 		// Send task to renderer
@@ -102,6 +102,10 @@ function createWindow(): void {
 			console.log("Sending task to renderer...");
 			mainWindow.webContents.send(IPC_EVENTS.TASK_TRIGGERED, currentTask);
 		}
+
+		// Snooze state may have just flipped back to false (snooze completed),
+		// so push the updated timer info to the renderer.
+		sendTimerInfo();
 	});
 
 	// Auto-start timer after page loads
@@ -162,8 +166,24 @@ function createTray(): void {
 	});
 }
 
+// Push current timer/snooze state to the renderer so it doesn't need to poll.
+function sendTimerInfo(): void {
+	if (mainWindow && !mainWindow.isDestroyed() && timerService) {
+		mainWindow.webContents.send(IPC_EVENTS.TIMER_INFO_UPDATED, {
+			isSnoozed: timerService.getIsSnoozed(),
+			currentThreshold: timerService.getThreshold(),
+		});
+	}
+}
+
 // App lifecycle
 app.whenReady().then(() => {
+	// Load settings BEFORE createWindow so currentSettings is populated
+	// when we check autoStart below, and so createWindow() can apply the
+	// interval to the timer.
+	storageService = new StorageService();
+	currentSettings = storageService.loadSettings();
+
 	// Setup auto-launch on Windows
 	if (currentSettings && currentSettings.autoStart) {
 		app.setLoginItemSettings({
@@ -220,6 +240,9 @@ ipcMain.on(IPC_EVENTS.SETTINGS_SAVE, (_event, settings: Settings) => {
 	if (mainWindow && !mainWindow.isDestroyed()) {
 		mainWindow.webContents.send(IPC_EVENTS.SETTINGS_UPDATED, settings);
 	}
+
+	// Interval change also resets snooze state — push updated timer info.
+	sendTimerInfo();
 });
 
 // IPC Handlers - Timer Info
@@ -315,6 +338,9 @@ ipcMain.on(IPC_EVENTS.TASK_SNOOZE, (_event, minutes: number) => {
 	if (mainWindow && !mainWindow.isDestroyed()) {
 		mainWindow.webContents.send(IPC_EVENTS.TASK_COMPLETED);
 	}
+
+	// Push the new snooze state to the renderer immediately (no polling).
+	sendTimerInfo();
 
 	// Show snooze notification
 	if (notificationService) {

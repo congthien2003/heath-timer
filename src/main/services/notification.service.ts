@@ -2,9 +2,9 @@ import { Notification } from "electron";
 import { Task } from "../../shared/models/task.model";
 
 export class NotificationService {
-	show(task: Task): void {
+	show(task: Task, minutes: number): void {
 		const notification = new Notification({
-			title: "⏰ Đã ngồi 60 phút rồi!",
+			title: `⏰ Đã ngồi ${minutes} phút rồi!`,
 			body: task.title,
 			silent: false,
 			timeoutType: "default",

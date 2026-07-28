@@ -32,46 +32,57 @@ function App() {
 		initTheme();
 	}, [initTheme]);
 
-	// Poll timer info periodically to check snooze status
-	useEffect(() => {
-		const checkTimerInfo = async () => {
-			if (window.electronAPI) {
-				const info = await window.electronAPI.getTimerInfo();
-				setIsSnoozed(info.isSnoozed);
-				setSnoozeInterval(info.currentThreshold);
-			}
-		};
-
-		checkTimerInfo();
-		const interval = setInterval(checkTimerInfo, 2000);
-		return () => clearInterval(interval);
-	}, []);
-
+	// Subscribe to IPC events once. Each `on*` returns an unsubscribe so we
+	// clean up on unmount and avoid stacking duplicate listeners on remount.
 	useEffect(() => {
 		if (!window.electronAPI) {
 			console.error("electronAPI not available!");
 			return;
 		}
 
+		// One-time snapshot of current timer/snooze state, then updates flow via
+		// onTimerInfoUpdated (no polling).
+		window.electronAPI.getTimerInfo().then((info) => {
+			setIsSnoozed(info.isSnoozed);
+			setSnoozeInterval(info.currentThreshold);
+		});
+
 		window.electronAPI.getSettings().then((settings) => {
 			setCurrentInterval(settings.intervalMinutes);
 		});
 
-		window.electronAPI.onTimerTick((time: number) => {
+		const unsubTick = window.electronAPI.onTimerTick((time: number) => {
 			setSittingTime(time);
 		});
 
-		window.electronAPI.onTaskTriggered((task: Task) => {
-			setCurrentTask(task);
-		});
+		const unsubTaskTriggered = window.electronAPI.onTaskTriggered(
+			(task: Task) => {
+				setCurrentTask(task);
+			},
+		);
 
-		window.electronAPI.onTaskCompleted(() => {
+		const unsubTaskCompleted = window.electronAPI.onTaskCompleted(() => {
 			setCurrentTask(null);
 		});
 
-		window.electronAPI.onSettingsUpdated((settings) => {
-			setCurrentInterval(settings.intervalMinutes);
+		const unsubSettings = window.electronAPI.onSettingsUpdated(
+			(settings) => {
+				setCurrentInterval(settings.intervalMinutes);
+			},
+		);
+
+		const unsubTimerInfo = window.electronAPI.onTimerInfoUpdated((info) => {
+			setIsSnoozed(info.isSnoozed);
+			setSnoozeInterval(info.currentThreshold);
 		});
+
+		return () => {
+			unsubTick();
+			unsubTaskTriggered();
+			unsubTaskCompleted();
+			unsubSettings();
+			unsubTimerInfo();
+		};
 	}, [setSittingTime, setCurrentTask]);
 
 	const handleComplete = useCallback(() => {

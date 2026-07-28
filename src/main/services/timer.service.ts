@@ -46,12 +46,14 @@ export class TimerService {
 		this.sittingTime++;
 		this.sendTickToRenderer();
 
-		// Check if threshold reached
-		if (
-			this.sittingTime >= this.threshold &&
-			this.sittingTime % this.threshold === 0
-		) {
+		// Trigger once we reach the threshold. Using >= instead of modulo
+		// so a skipped tick (Electron throttles intervals when hidden/sleeping)
+		// still triggers on the next caught tick instead of missing forever.
+		if (this.sittingTime >= this.threshold) {
 			console.log(`Threshold reached: ${this.sittingTime} seconds`);
+			// Reset countdown so it cycles 00:00 → threshold → 00:00 and
+			// never drifts past the boundary.
+			this.sittingTime -= this.threshold;
 
 			// If snoozed, restore original threshold after trigger
 			if (this.isSnoozed) {

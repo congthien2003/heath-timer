@@ -18,10 +18,16 @@ export interface ElectronAPI {
 	}>;
 	getHistory: () => Promise<HistoryRecord[]>;
 	getStats: () => Promise<UserStats>;
-	onTimerTick: (callback: (time: number) => void) => void;
-	onTaskTriggered: (callback: (task: Task) => void) => void;
-	onTaskCompleted: (callback: () => void) => void;
-	onSettingsUpdated: (callback: (settings: Settings) => void) => void;
+	onTimerTick: (callback: (time: number) => void) => () => void;
+	onTaskTriggered: (callback: (task: Task) => void) => () => void;
+	onTaskCompleted: (callback: () => void) => () => void;
+	onSettingsUpdated: (callback: (settings: Settings) => void) => () => void;
+	onTimerInfoUpdated: (
+		callback: (info: {
+			isSnoozed: boolean;
+			currentThreshold: number;
+		}) => void,
+	) => () => void;
 }
 
 declare global {

@@ -23,20 +23,43 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	// Timer info
 	getTimerInfo: () => ipcRenderer.invoke(IPC_EVENTS.TIMER_INFO_GET),
 
-	// Event listeners
+	// Event listeners — each returns an unsubscribe so the renderer can clean
+	// up in a useEffect return and avoid stacking duplicate listeners on remount.
 	onTimerTick: (callback: (time: number) => void) => {
-		ipcRenderer.on(IPC_EVENTS.TIMER_TICK, (_, time) => callback(time));
+		const handler = (_: unknown, time: number) => callback(time);
+		ipcRenderer.on(IPC_EVENTS.TIMER_TICK, handler);
+		return () => ipcRenderer.removeListener(IPC_EVENTS.TIMER_TICK, handler);
 	},
 	onTaskTriggered: (callback: (task: any) => void) => {
-		ipcRenderer.on(IPC_EVENTS.TASK_TRIGGERED, (_, task) => callback(task));
+		const handler = (_: unknown, task: any) => callback(task);
+		ipcRenderer.on(IPC_EVENTS.TASK_TRIGGERED, handler);
+		return () =>
+			ipcRenderer.removeListener(IPC_EVENTS.TASK_TRIGGERED, handler);
 	},
 	onTaskCompleted: (callback: () => void) => {
-		ipcRenderer.on(IPC_EVENTS.TASK_COMPLETED, () => callback());
+		const handler = () => callback();
+		ipcRenderer.on(IPC_EVENTS.TASK_COMPLETED, handler);
+		return () => ipcRenderer.removeListener(IPC_EVENTS.TASK_COMPLETED, handler);
 	},
 	onSettingsUpdated: (callback: (settings: any) => void) => {
-		ipcRenderer.on(IPC_EVENTS.SETTINGS_UPDATED, (_, settings) =>
-			callback(settings),
-		);
+		const handler = (_: unknown, settings: any) => callback(settings);
+		ipcRenderer.on(IPC_EVENTS.SETTINGS_UPDATED, handler);
+		return () =>
+			ipcRenderer.removeListener(IPC_EVENTS.SETTINGS_UPDATED, handler);
+	},
+	onTimerInfoUpdated: (
+		callback: (info: {
+			isSnoozed: boolean;
+			currentThreshold: number;
+		}) => void,
+	) => {
+		const handler = (
+			_: unknown,
+			info: { isSnoozed: boolean; currentThreshold: number },
+		) => callback(info);
+		ipcRenderer.on(IPC_EVENTS.TIMER_INFO_UPDATED, handler);
+		return () =>
+			ipcRenderer.removeListener(IPC_EVENTS.TIMER_INFO_UPDATED, handler);
 	},
 	// History & Stats
 	getHistory: () => ipcRenderer.invoke(IPC_EVENTS.HISTORY_GET_ALL),

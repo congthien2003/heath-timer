@@ -24,7 +24,9 @@ export const IPC_EVENTS = {
 	HISTORY_ADD: "history:add",
 	HISTORY_GET_ALL: "history:get-all",
 	STATS_GET: "stats:get",
-	BEST_STREAK_GET: "stats:best-streak",
+
+	// Timer info pushed from main when snooze state changes
+	TIMER_INFO_UPDATED: "timer:info:updated",
 } as const;
 
 export type IpcEventType = (typeof IPC_EVENTS)[keyof typeof IPC_EVENTS];
