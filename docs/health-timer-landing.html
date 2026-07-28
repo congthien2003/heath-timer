@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Health Timer — Nhắc nghỉ giải lao cho dân ngồi nhiều</title>
+<meta name="description" content="Health Timer là widget desktop nhỏ gọn nhắc bạn uống nước, đứng dậy và nghỉ mắt định kỳ. Electron + React, theme sáng/tối, theo dõi streak." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #f6f2ea;
+    --surface: #fbf8f2;
+    --surface-hover: #efe9de;
+    --primary: #4a7c59;
+    --primary-light: #6da67a;
+    --primary-faint: rgba(74, 124, 89, 0.10);
+    --accent: #b8763e;
+    --accent-light: #cf8d52;
+    --text: #2a2723;
+    --text-secondary: #6b655c;
+    --muted: #9a9286;
+    --border: #e2dccf;
+    --border-strong: #cfc7b6;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  /* App widget mockup — replicates the real 320x430 widget */
+  .widget {
+    width: 300px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 1px 0 rgba(42,39,35,0.04), 0 18px 40px -24px rgba(42,39,35,0.35);
+    overflow: hidden;
+  }
+  .widget-bar { border-bottom: 1px solid var(--border); }
+  .icon-btn {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 9999px;
+    color: var(--text-secondary);
+    background: transparent;
+  }
+  .icon-btn:hover { background: var(--surface-hover); color: var(--text); }
+  .hairline {
+    height: 2px; border-radius: 9999px; background: var(--border); position: relative; overflow: hidden;
+  }
+  .hairline > span {
+    position: absolute; inset-block: 0; left: 0; width: 58%;
+    background: var(--primary); border-radius: 9999px;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff; border-radius: 9999px;
+    transition: background .15s ease;
+  }
+  .btn-primary:hover { background: #3f6b4d; }
+  .btn-secondary {
+    background: transparent; color: var(--text); border: 1px solid var(--border-strong); border-radius: 9999px;
+    transition: background .15s ease;
+  }
+  .btn-secondary:hover { background: var(--surface-hover); }
+  .dot { width: 10px; height: 10px; border-radius: 9999px; flex: none; }
+  .feature-row { border-top: 1px solid var(--border); }
+  .step-line { border-left: 2px solid var(--border); }
+  .badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .25rem .7rem; border-radius: 9999px;
+    background: var(--primary-faint); color: var(--primary);
+    font-size: .72rem; font-weight: 600; letter-spacing: .02em;
+  }
+  .badge::before { content: ""; width: 6px; height: 6px; border-radius: 9999px; background: var(--primary); }
+  a.gh { color: var(--text-secondary); }
+  a.gh:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+    <span class="text-sm font-semibold tracking-wide lowercase">health timer</span>
+    <div class="flex items-center gap-6 text-sm">
+      <a href="#features" class="gh hidden sm:inline">Tính năng</a>
+      <a href="#how" class="gh hidden sm:inline">Cách hoạt động</a>
+      <a href="https://github.com/congthien2003/heath-timer" class="gh inline-flex items-center gap-1.5">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.83 0c2.22-1.5 3.2-1.18 3.2-1.18.63 1.59.23 2.75.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="max-w-5xl mx-auto px-6 pt-10 pb-20">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <!-- Copy -->
+      <div>
+        <span class="badge">Phiên bản 2.0.0</span>
+        <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold leading-[1.08] tracking-tight">
+          Nhắc bạn nghỉ giải lao,<br/>không làm phiền công việc.
+        </h1>
+        <p class="mt-5 text-lg text-[color:var(--text-secondary)] max-w-md">
+          Health Timer là widget desktop nhỏ gọn, chạy nền ở khay hệ thống và nhắc bạn uống nước, đứng dậy, nghỉ mắt theo chu kỳ tự chọn.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a href="https://github.com/congthien2003/heath-timer/releases" class="btn-primary inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Tải cho Windows
+          </a>
+          <a href="https://github.com/congthien2003/heath-timer" class="btn-secondary inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold">Xem mã nguồn</a>
+        </div>
+        <p class="mt-4 text-xs text-[color:var(--muted)]">Windows 10+ · ~100–150 MB · miễn phí · ISC License</p>
+      </div>
+
+      <!-- Widget mockup -->
+      <div class="flex justify-center md:justify-end">
+        <div class="widget">
+          <!-- top bar -->
+          <div class="widget-bar flex items-center justify-between px-4 py-3">
+            <span class="text-[11px] font-semibold tracking-widest lowercase text-[color:var(--text-secondary)]">health timer</span>
+            <div class="flex gap-1">
+              <span class="icon-btn" title="Thống kê">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="14"/></svg>
+              </span>
+              <span class="icon-btn" title="Giao diện">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+              </span>
+              <span class="icon-btn" title="Cài đặt">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.34.22.7.22 1.07"/></svg>
+              </span>
+            </div>
+          </div>
+          <!-- body -->
+          <div class="px-6 pt-10 pb-8 text-center">
+            <p class="text-5xl font-bold tabular-nums leading-none">42:18</p>
+            <div class="hairline mt-6"><span></span></div>
+            <p class="mt-3 text-xs font-medium" style="color: var(--muted)">next break · 17m</p>
+            <p class="mt-8 text-xs font-medium" style="color: var(--muted)">Đang theo dõi sức khỏe của bạn 🌿</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- FEATURES -->
+  <section id="features" class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-[color:var(--muted)]">Tính năng nổi bật</h2>
+    <div class="mt-8 grid sm:grid-cols-2 gap-x-10">
+      <div class="feature-row py-6 sm:pr-6">
+        <h3 class="text-lg font-semibold">Widget nhỏ gọn, chạy nền</h3>
+        <p class="mt-2 text-[color:var(--text-secondary)]">Cửa sổ 320×430, thu nhỏ vào khay hệ thống. Đóng cửa sổ không thoát app — bạn làm việc mà không bị phân tâm.</p>
+      </div>
+      <div class="feature-row py-6 sm:pl-6">
+        <h3 class="text-lg font-semibold">Theme sáng / tối / hệ thống</h3>
+        <p class="mt-2 text-[color:var(--text-secondary)]">Bảng màu "Editorial Quiet" tự theo dõi <span class="mono text-xs">prefers-color-scheme</span> và chuyển live theo hệ điều hành.</p>
+      </div>
+      <div class="feature-row py-6 sm:pr-6">
+        <h3 class="text-lg font-semibold">Insights &amp; streak</h3>
+        <p class="mt-2 text-[color:var(--text-secondary)]">Theo dõi chu kỳ liên tục, tổng số lần hoàn thành và lịch sử gần đây để duy trì động lực.</p>
+      </div>
+      <div class="feature-row py-6 sm:pl-6">
+        <h3 class="text-lg font-semibold">Snooze 5 / 10 / 15 phút</h3>
+        <p class="mt-2 text-[color:var(--text-secondary)]">Tạm hoãn break khi đang bận; sau khi snooze kết thúc, chu kỳ gốc tự khôi phục.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="bg-[color:var(--surface)] border-y border-[color:var(--border)]">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <h2 class="text-sm font-semibold uppercase tracking-widest text-[color:var(--muted)]">Cách hoạt động</h2>
+      <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="step-line pl-4">
+          <p class="text-xs font-semibold" style="color: var(--primary)">Bước 1 · Đếm ngược</p>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Timer chạy nền mỗi giây, hiển thị MM:SS cùng thanh tiến trình mảnh.</p>
+        </div>
+        <div class="step-line pl-4" style="border-color: var(--accent)">
+          <p class="text-xs font-semibold" style="color: var(--accent)">Bước 2 · Đến giờ nghỉ</p>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Đạt ngưỡng → một task ngẫu nhiên xuất hiện kèm thông báo desktop.</p>
+        </div>
+        <div class="step-line pl-4">
+          <p class="text-xs font-semibold" style="color: var(--primary)">Bước 3 · Hoàn thành / Snooze</p>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Bấm "Hoàn thành" để ghi lịch sử, hoặc snooze khi cần thêm thời gian.</p>
+        </div>
+        <div class="step-line pl-4" style="border-color: var(--accent)">
+          <p class="text-xs font-semibold" style="color: var(--accent)">Bước 4 · Lặp lại</p>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Timer reset, đếm lại từ đầu. Insights cập nhật streak tự động.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BREAK TYPES -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-[color:var(--muted)]">Ba kiểu break xen kẽ</h2>
+    <div class="mt-8 grid sm:grid-cols-3 gap-6">
+      <div class="flex items-start gap-3">
+        <span class="dot mt-1.5" style="background: #3b82f6"></span>
+        <div>
+          <h3 class="font-semibold">Uống nước</h3>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Nhắc lấy một ngụm nước, duy trì sự tập trung.</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="dot mt-1.5" style="background: var(--primary)"></span>
+        <div>
+          <h3 class="font-semibold">Vận động 2 phút</h3>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Đứng dậy, duỗi người, cải thiện tuần hoàn.</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="dot mt-1.5" style="background: var(--accent)"></span>
+        <div>
+          <h3 class="font-semibold">Nghỉ mắt (20-20-20)</h3>
+          <p class="mt-1 text-sm text-[color:var(--text-secondary)]">Nhìn xa 20 giây, giảm mỏi mắt khi dùng màn hình lâu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-t border-[color:var(--border)]">
+    <div class="max-w-3xl mx-auto px-6 py-20 text-center">
+      <h2 class="text-3xl font-bold tracking-tight">Bắt đầu ngồi khỏe hơn hôm nay</h2>
+      <p class="mt-3 text-[color:var(--text-secondary)]">Tải installer Windows, chạy wizard là dùng được ngay.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="https://github.com/congthien2003/heath-timer/releases" class="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Tải HealthTimer-Setup-2.0.0.exe
+        </a>
+        <a href="https://github.com/congthien2003/heath-timer" class="btn-secondary inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold">GitHub</a>
+      </div>
+
+      <details class="mt-10 text-left mx-auto max-w-lg bg-[color:var(--surface)] border border-[color:var(--border)] rounded-xl px-4 py-3">
+        <summary class="cursor-pointer text-sm font-medium">Chạy từ mã nguồn</summary>
+        <pre class="mono text-xs mt-3 leading-relaxed text-[color:var(--text-secondary)]">git clone https://github.com/congthien2003/heath-timer.git
+cd heath-timer
+npm install
+npm run dev        # phát triển
+npm run build:win  # build installer</pre>
+      </details>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-[color:var(--border)]">
+    <div class="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[color:var(--muted)]">
+      <span class="lowercase tracking-wide">health timer · v2.0.0</span>
+      <div class="flex items-center gap-5">
+        <a href="https://github.com/congthien2003/heath-timer/issues" class="gh">Issues</a>
+        <a href="https://github.com/congthien2003/heath-timer/releases" class="gh">Releases</a>
+        <a href="https://github.com/congthien2003/heath-timer" class="gh">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
