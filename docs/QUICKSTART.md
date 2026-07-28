@@ -1,16 +1,15 @@
 # Health Timer - Quick Start Guide
 
+> Version 2.0.0
+
 ## 📦 Installation
 
 1. **Download** the installer:
-
-   - Get `Health-Timer-Setup-1.0.0.exe` from releases
+   - Get `HealthTimer-Setup-2.0.0.exe` from Releases
    - File size: ~100-150 MB
 
 2. **Run** the installer:
-
-   - Double-click the `.exe` file
-   - Click "Next" through the installation wizard
+   - Double-click the `.exe`
    - Choose installation directory (or use default)
    - Select "Create desktop shortcut" if desired
    - Click "Install"
@@ -23,219 +22,164 @@
 
 ### First Time Setup
 
-1. **Timer starts automatically** with 60-minute default interval
-2. **Configure settings** (optional):
-   - Click the ⚙️ Settings button
-   - Choose your preferred interval: 30, 45, or 60 minutes
-   - Enable/disable features:
-     - ✅ Auto-start with Windows
-     - ✅ Enable sound notifications
-     - ✅ Enable desktop notifications
-   - Click "Save Settings"
+1. **Timer starts automatically** with a 60-minute default interval
+2. **Theme** follows your system (light/dark) by default
+3. **Configure settings** (optional) via ⚙️ Settings (top-right):
+   - ⏱️ **Thời gian**: interval slider (30 / 45 / 60 minutes)
+   - 🔔 **Thông báo**: sound, notifications, auto-start with Windows
+   - 🎨 **Giao diện**: theme — Sáng / Tối / Hệ thống
+   - Click **Lưu** to save
 
 ### Understanding the Interface
 
 ```
-┌─────────────────────────────────────┐
-│  Health Timer         [_][□][×]      │
-├─────────────────────────────────────┤
-│                                      │
-│         Time Until Break             │
-│            45:30                     │
-│                                      │
-│    [Task card appears when ready]    │
-│                                      │
-│                          [⚙️]         │
-└─────────────────────────────────────┘
+┌─────────────────────────────┐
+│  health timer        📊 🌙 ⚙️ │
+├─────────────────────────────┤
+│                              │
+│           42:18              │
+│        ───────────           │
+│      next break · 17m        │
+│                              │
+│   Đang theo dõi sức khỏe 🌿  │
+│                              │
+└─────────────────────────────┘
 ```
 
-**Main Display:**
+**Top bar**:
+- 📊 **Insights** — streak, total completed, recent history
+- 🌙 / ☀️ **Theme toggle** — quick switch light/dark
+- ⚙️ **Settings** — configuration
 
-- **Timer**: Shows countdown to next break
-- **Task Card**: Appears when it's time for a break
-- **Settings Button** (⚙️): Opens configuration
+**Main area**:
+- **Timer** — countdown to next break (MM:SS, or H:MM:SS past an hour)
+- **Task card** — appears when it's time for a break
+- **Hairline progress rule** — fills as the cycle progresses
 
 ## 🎯 Daily Usage
 
 ### Normal Operation
 
-1. **Timer Counts Down**:
+1. **Timer counts down** in the background; closing the window minimizes to tray
+2. **Break time!** — desktop notification + Task Card appears:
+   - 💧 **Uống 1 ngụm nước** — hydration
+   - 🚶 **Đứng dậy vận động 2 phút** — movement/stretch
+   - 👀 **Nhìn xa 20 giây (20-20-20 rule)** — eye rest
+3. **Complete the task**:
+   - Click **Hoàn thành** → celebration overlay → timer resets and the task is logged to history
+4. **Need more time?**:
+   - Click **5m / 10m / 15m** to snooze
+   - After the snooze fires, the original cycle resumes automatically
 
-   - Displays time until next health break
-   - Runs in background
+### System Tray (right-click icon)
 
-2. **Break Time!**:
+- 👁️ **Show App** — restore the window
+- ⏸️ **Pause Timer** / ▶️ **Start Timer** — toggle the countdown
+- ❌ **Quit** — close the app completely
 
-   - Desktop notification appears
-   - Task card shows on app
-   - Three types of tasks:
-     - 💧 **Drink Water**: Stay hydrated
-     - 🚶 **Take a Break**: Move and stretch
-     - 👀 **Rest Eyes**: Look away from screen
+**Tip**: the app runs in the tray so you can keep working without distraction.
 
-3. **Complete the Task**:
+## 📊 Insights Dashboard
 
-   - Click ✅ **Complete** button
-   - Timer resets to full interval
-   - Continue working!
+Click 📊 in the top bar to open:
 
-4. **Need More Time?**:
-   - Click ⏸️ **Snooze 5min** button
-   - Timer postpones for 5 minutes
-   - After snooze, returns to normal interval
-
-### System Tray
-
-**Minimize to Tray:**
-
-- Minimize window → app hides to system tray
-- Find icon in notification area (bottom-right)
-
-**Tray Menu** (right-click icon):
-
-- 👁️ **Show App**: Restore window
-- ⏸️ **Pause Timer**: Stop countdown
-- ▶️ **Start Timer**: Resume countdown
-- ❌ **Quit**: Close app completely
-
-**Tip**: App runs in tray so you can keep working without distraction!
+- **Chu kỳ hiện tại** — current streak (consecutive days with a completed task)
+- **Tổng hoàn thành** — total completed tasks
+- **Kỷ lục của bạn** — best streak (days)
+- **Lịch sử gần đây** — last 5 completions with task + time
 
 ## ⚙️ Settings Explained
 
-### Timer Interval
+### ⏱️ Thời gian — Timer Interval
+- **30 min**: frequent breaks (intense work)
+- **45 min**: balanced
+- **60 min**: less frequent breaks
+- Changing the interval resets the countdown; other settings do not disturb the running timer.
 
-Choose how often you want break reminders:
+### 🔔 Thông báo — Notifications
+- **🔊 Âm thanh**: play sound with notifications
+- **📢 Thông báo**: show desktop notifications
+- **🚀 Tự động khởi động**: launch with Windows
 
-- **30 minutes**: Frequent breaks (recommended for intense work)
-- **45 minutes**: Balanced approach
-- **60 minutes**: Less frequent breaks
+### 🎨 Giao diện — Theme
+- **☀️ Sáng** / **🌙 Tối** / **💻 Hệ thống** (follows OS `prefers-color-scheme`, updates live)
 
-### Auto-start with Windows
-
-- ✅ **ON**: App launches automatically when Windows starts
-- ❌ **OFF**: Manual launch required
-
-### Enable Sound
-
-- ✅ **ON**: Plays sound with notifications
-- ❌ **OFF**: Silent notifications
-
-### Enable Notifications
-
-- ✅ **ON**: Desktop notifications appear
-- ❌ **OFF**: No notifications (timer only)
-
-**Note**: Settings save automatically when you close the modal.
+**Note**: Settings persist via `electron-store` when you click **Lưu**.
 
 ## 💡 Tips & Tricks
 
-### Productivity Tips
-
-1. **Start with 60 minutes**: Adjust based on your needs
-2. **Don't skip breaks**: Your health is important!
-3. **Use snooze wisely**: Only when truly needed
-4. **Pause during meetings**: Right-click tray icon → Pause
+1. **Start with 60 minutes**, then adjust based on your needs
+2. **Don't skip breaks** — your health matters
+3. **Use snooze wisely** — only when truly needed
+4. **Pause during meetings** — right-click tray → Pause Timer
+5. **Check Insights** regularly to stay motivated
 
 ### Health Benefits
 
-**💧 Hydration breaks:**
-
-- Drink 8 glasses of water daily
-- Helps concentration and energy
-
-**🚶 Movement breaks:**
-
-- Stand up and walk around
-- Reduces back pain and stiffness
-- Improves circulation
-
-**👀 Eye rest breaks:**
-
-- Follow 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds
-- Reduces eye strain and headaches
+- **💧 Hydration**: aids concentration and energy
+- **🚶 Movement**: reduces back pain and stiffness, improves circulation
+- **👀 Eye rest**: follow the 20-20-20 rule to reduce eye strain and headaches
 
 ## 🔧 Troubleshooting
 
-### Common Issues
-
 **Notifications not showing?**
-
 1. Check Windows notification settings
 2. Disable Focus Assist
-3. Ensure "Enable Notifications" is ON in app settings
+3. Ensure **Thông báo** is ON (Settings → 🔔)
 
 **Timer not starting?**
-
-1. Check if timer is paused (tray menu)
+1. Check if paused (tray menu)
 2. Restart the app
-3. Check task manager for multiple instances
+3. Check Task Manager for multiple instances
 
 **App not in system tray?**
-
-1. Check hidden icons (click ^ in system tray)
-2. Customize notification area to always show icon
+1. Check hidden icons (click ^ in the system tray)
+2. Customize the notification area to always show the icon
 
 **Auto-start not working?**
+1. Run the app as administrator once
+2. Check Task Manager → Startup
 
-1. Run app as administrator once
-2. Check Windows Startup apps (Task Manager → Startup)
+**Theme not following system?**
+1. Set theme to **💻 Hệ thống** (Settings → 🎨)
 
 ### Getting Help
 
-- Check [README.md](../README.md) for detailed documentation
-- Review [TESTING.md](TESTING.md) for known issues
+- [README.md](../README.md) — full documentation
+- [CHANGELOG.md](../CHANGELOG.md) — release notes
 - Report bugs on GitHub Issues
-
-## 🚀 Advanced Features
-
-### Keyboard Shortcuts (Coming Soon)
-
-- `Ctrl+P`: Pause/Resume timer
-- `Ctrl+R`: Reset timer
-- `Ctrl+,`: Open settings
-
-### Data Storage
-
-Settings are saved at:
-
-```
-%APPDATA%\health-timer\config\settings.json
-```
-
-You can back up this file to preserve your settings.
 
 ## 📈 Recommended Usage Patterns
 
-### For Office Workers
+| User | Interval | Auto-start | Sound |
+| --- | --- | --- | --- |
+| Office workers | 45–60 min | ON | ON |
+| Developers/Designers | 45 min | ON | ON (snooze during deep work) |
+| Students | 30–45 min | OFF | ON |
 
-- Interval: 45-60 minutes
-- Auto-start: ON
-- Sound: ON
-- Perfect for desk jobs with long sitting periods
+## 🔌 Data Storage
 
-### For Developers/Designers
+`electron-store` persists settings, history, and stats at:
 
-- Interval: 45 minutes
-- Sound: ON (stay focused but healthy)
-- Use snooze during critical debugging
+```
+%APPDATA%\health-timer\config\config.json
+```
 
-### For Students
-
-- Interval: 30-45 minutes
-- Sound: ON
-- Helps maintain focus and prevent fatigue
+Back up this file to preserve your data across reinstalls.
 
 ## ✅ Quick Reference
 
-| Action          | How To                         |
-| --------------- | ------------------------------ |
-| Open app        | Click tray icon or Start Menu  |
-| Change interval | Settings → Select time → Save  |
-| Pause timer     | Right-click tray → Pause Timer |
-| Complete task   | Click ✅ Complete button       |
-| Snooze break    | Click ⏸️ Snooze 5min button    |
-| Hide to tray    | Click minimize button          |
-| Quit app        | Right-click tray → Quit        |
+| Action | How To |
+| --- | --- |
+| Open app | Click tray icon or Start Menu |
+| Change interval | Settings → ⏱️ → slider → Lưu |
+| Toggle theme | Click 🌙/☀️ in top bar |
+| View stats | Click 📊 in top bar |
+| Complete task | Click **Hoàn thành** |
+| Snooze break | Click **5m / 10m / 15m** |
+| Pause timer | Right-click tray → Pause Timer |
+| Hide to tray | Close the window |
+| Quit app | Right-click tray → Quit |
 
 ---
 
