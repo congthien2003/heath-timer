@@ -19,8 +19,8 @@ let currentSettings: Settings;
 
 function createWindow(): void {
 	mainWindow = new BrowserWindow({
-		width: 400,
-		height: 600,
+		width: 320,
+		height: 430,
 		resizable: false,
 		webPreferences: {
 			preload: join(__dirname, "../preload/index.cjs"),
@@ -217,6 +217,10 @@ ipcMain.handle(IPC_EVENTS.SETTINGS_GET, () => {
 
 ipcMain.on(IPC_EVENTS.SETTINGS_SAVE, (_event, settings: Settings) => {
 	console.log("Saving settings:", settings);
+
+	// Capture the previous interval before overwriting currentSettings so we
+	// can tell whether this save actually changes the timer interval.
+	const prevInterval = currentSettings.intervalMinutes;
 	currentSettings = settings;
 
 	if (storageService) {
@@ -229,8 +233,10 @@ ipcMain.on(IPC_EVENTS.SETTINGS_SAVE, (_event, settings: Settings) => {
 		path: process.execPath,
 	});
 
-	// Apply new interval to timer
-	if (timerService) {
+	// Only reset the timer when the interval actually changes. Other settings
+	// (theme, sound, notifications, autoStart) must not disturb the running
+	// countdown — toggling theme previously reset sittingTime via this handler.
+	if (timerService && settings.intervalMinutes !== prevInterval) {
 		timerService.setThreshold(settings.intervalMinutes);
 		timerService.reset();
 		timerService.start();

@@ -18,7 +18,7 @@ function App() {
 		snoozeTask,
 	} = useTimerStore();
 
-	const { initTheme } = useThemeStore();
+	const { initTheme, resolved, setTheme } = useThemeStore();
 
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 	const [isInsightsOpen, setIsInsightsOpen] = useState(false);
@@ -101,9 +101,18 @@ function App() {
 		setShowCelebration(false);
 	}, []);
 
+	const handleToggleTheme = useCallback(() => {
+		setTheme(resolved === "dark" ? "light" : "dark");
+	}, [resolved, setTheme]);
+
 	const progress = Math.min(sittingTime / (currentInterval * 60), 1);
-	const circumference = 2 * Math.PI * 90;
-	const strokeDasharray = `${progress * circumference} ${circumference}`;
+	const minutesLeft = Math.max(0, currentInterval - Math.floor(sittingTime / 60));
+
+	const caption = currentTask
+		? null
+		: isSnoozed
+			? { text: `snoozed · resumes in ${snoozeInterval}m`, accent: true }
+			: { text: `next break · ${minutesLeft}m`, accent: false };
 
 	return (
 		<div
@@ -112,133 +121,87 @@ function App() {
 			{/* Top Bar */}
 			<div className="flex items-center justify-between px-5 pt-4 pb-2 animate-fadeIn">
 				<h1
-					className="text-base font-bold"
+					className="text-xs font-semibold tracking-widest lowercase"
 					style={{ color: "var(--color-text-secondary)" }}>
-					Health Timer
+					health timer
 				</h1>
 				<div className="flex gap-1.5">
 					<button
 						onClick={() => setIsInsightsOpen(true)}
 						className="btn-icon"
 						title="Thống kê">
-						<span className="text-lg">📊</span>
+						<span className="text-base leading-none">📊</span>
+					</button>
+					<button
+						onClick={handleToggleTheme}
+						className="btn-icon"
+						title={resolved === "dark" ? "Chuyển sáng" : "Chuyển tối"}>
+						<span className="text-base leading-none">{resolved === "dark" ? "☀️" : "🌙"}</span>
 					</button>
 					<button
 						onClick={() => setIsSettingsOpen(true)}
 						className="btn-icon"
 						title="Cài đặt">
-						<span className="text-lg">⚙️</span>
+						<span className="text-base leading-none">⚙️</span>
 					</button>
 				</div>
 			</div>
 
 			{/* Main Content */}
 			<div className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
-				<div className="w-full max-w-sm animate-slideUp">
-					{/* Timer Display */}
-					<div className="text-center mb-6">
-						<div className="relative inline-block">
-							<svg
-								className="transform -rotate-90"
-								width="200"
-								height="200"
-								viewBox="0 0 200 200">
-								{/* Track */}
-								<circle
-									cx="100"
-									cy="100"
-									r="90"
-									stroke="var(--color-timer-track)"
-									strokeWidth="10"
-									fill="none"
-								/>
-								{/* Progress */}
-								<circle
-									cx="100"
-									cy="100"
-									r="90"
-									stroke="var(--color-timer-progress)"
-									strokeWidth="10"
-									strokeLinecap="round"
-									fill="none"
-									strokeDasharray={strokeDasharray}
-									style={{
-										transition:
-											"stroke-dasharray 1s ease-in-out",
-									}}
-								/>
-							</svg>
-
-							{/* Timer text */}
-							<div className="absolute inset-0 flex items-center justify-center">
-								<p
-									className="text-5xl font-extrabold tabular-nums"
-									style={{ color: "var(--color-text)" }}>
-									{formatTime()}
-								</p>
-							</div>
-						</div>
-					</div>
-
-					{/* Status */}
-					{isSnoozed ? (
-						<div
-							className="card p-4 text-center mb-5 animate-fadeIn"
-							style={{
-								borderColor: "var(--color-accent)",
-								borderLeftWidth: "3px",
-							}}>
-							<p
-								className="text-sm font-bold flex items-center justify-center gap-2"
-								style={{ color: "var(--color-text)" }}>
-								<span className="animate-pulse-soft">⏰</span>
-								Đang snooze — Nhắc lại sau {snoozeInterval} phút
-							</p>
-							<p
-								className="text-xs mt-1"
-								style={{ color: "var(--color-muted)" }}>
-								Sau đó trở về chu kỳ {currentInterval} phút
-							</p>
-						</div>
-					) : !currentTask ? (
-						<div
-							className="card-flat p-4 text-center mb-5 animate-fadeIn"
-							style={{ borderColor: "var(--color-primary)" }}>
-							<div className="flex items-center justify-center gap-2">
-								<span
-									className="w-2 h-2 rounded-full animate-pulse-soft"
-									style={{
-										background: "var(--color-primary)",
-									}}
-								/>
-								<p
-									className="text-sm font-semibold"
-									style={{
-										color: "var(--color-text-secondary)",
-									}}>
-									Nhắc nhở sau {currentInterval} phút
-								</p>
-							</div>
-						</div>
-					) : null}
-
-					{/* Task Card */}
-					{currentTask && (
+				<div className="w-full max-w-sm animate-fadeIn">
+					{currentTask ? (
 						<TaskCard
 							task={currentTask}
 							onComplete={handleComplete}
 							onSnooze={handleSnooze}
 						/>
-					)}
-
-					{/* Idle state - motivational */}
-					{!currentTask && !isSnoozed && (
-						<div className="text-center animate-fadeIn mt-2">
+					) : (
+						<div className="text-center">
+							{/* Timer — serif numerals */}
 							<p
-								className="text-sm font-medium"
-								style={{ color: "var(--color-muted)" }}>
-								Đang theo dõi sức khỏe của bạn 🌿
+								className="text-6xl font-bold tabular-nums leading-none"
+								style={{ color: "var(--color-text)" }}>
+								{formatTime()}
 							</p>
+
+							{/* Hairline progress rule */}
+							<div
+								className="relative mt-6 h-px w-full rounded-full overflow-hidden"
+								style={{ background: "var(--color-timer-track)" }}>
+								<div
+									className="absolute inset-y-0 left-0 rounded-full"
+									style={{
+										width: `${progress * 100}%`,
+										height: "2px",
+										top: "-0.5px",
+										background: "var(--color-timer-progress)",
+										transition: "width 1s linear",
+									}}
+								/>
+							</div>
+
+							{/* Caption */}
+							{caption && (
+								<p
+									className="mt-3 text-xs font-medium tracking-wide animate-fadeIn"
+									style={{
+										color: caption.accent
+											? "var(--color-accent)"
+											: "var(--color-muted)",
+									}}>
+									{caption.text}
+								</p>
+							)}
+
+							{/* Idle hint */}
+							{!isSnoozed && (
+								<p
+									className="mt-8 text-xs font-medium animate-fadeIn"
+									style={{ color: "var(--color-muted)" }}>
+									Đang theo dõi sức khỏe của bạn 🌿
+								</p>
+							)}
 						</div>
 					)}
 				</div>
