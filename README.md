@@ -46,7 +46,7 @@ A compact desktop widget that reminds you to take regular health breaks througho
 
 ### Download
 
-1. Download the latest release from the [Releases](https://github.com/yourusername/health-timer/releases) page
+1. Download the latest release from the [Releases](https://github.com/congthien2003/heath-timer/releases) page
 2. Run the installer (`HealthTimer-Setup-2.0.0.exe`)
 3. Follow the installation wizard
 
@@ -54,7 +54,7 @@ A compact desktop widget that reminds you to take regular health breaks througho
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/health-timer.git
+git clone https://github.com/congthien2003/heath-timer.git
 cd health-timer
 
 # Install dependencies
@@ -293,8 +293,8 @@ ISC License — see [LICENSE](LICENSE).
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/health-timer/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/health-timer/discussions)
+- **Issues**: [GitHub Issues](https://github.com/congthien2003/heath-timer/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/congthien2003/heath-timer/discussions)
 - **Release notes**: [CHANGELOG.md](CHANGELOG.md)
 
 ---

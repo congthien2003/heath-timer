@@ -202,8 +202,8 @@ Special thanks to:
 
 ### 📞 Support
 
-- **Report Issues**: [GitHub Issues](https://github.com/yourusername/health-timer/issues)
-- **Feature Requests**: [GitHub Discussions](https://github.com/yourusername/health-timer/discussions)
+- **Report Issues**: [GitHub Issues](https://github.com/congthien2003/heath-timer/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/congthien2003/heath-timer/discussions)
 - **Documentation**: [docs/](docs/)
 
 ### 📜 License
@@ -212,6 +212,6 @@ ISC License - See LICENSE file for details
 
 ---
 
-**Download**: [Latest Release](https://github.com/yourusername/health-timer/releases/latest)  
+**Download**: [Latest Release](https://github.com/congthien2003/heath-timer/releases/latest)  
 **Documentation**: [README.md](README.md)  
 **Testing Guide**: [docs/TESTING.md](docs/TESTING.md)

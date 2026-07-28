@@ -183,6 +183,6 @@ Back up this file to preserve your data across reinstalls.
 
 ---
 
-**Need more help?** Check the full [README.md](../README.md) or [create an issue](https://github.com/yourusername/health-timer/issues).
+**Need more help?** Check the full [README.md](../README.md) or [create an issue](https://github.com/congthien2003/heath-timer/issues).
 
 **Stay healthy! 💪**
